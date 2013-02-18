@@ -1,0 +1,7 @@
+docs/_build/
+*.pyc
+*.swp
+*egg-info
+.idea*
+.DS_Store
+venv
