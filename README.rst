@@ -7,7 +7,10 @@ django-conceptq
 the problem
 -----------
 
-The problem: say you have a bit of logic that applies to a model -- for example, a pizza topping is "savory" if it's salty or spicy, but not sweet.  The models::
+The problem: say you have a bit of logic that applies to a model -- for example, a pizza topping is 
+"savory" if it's salty or spicy, but not sweet.  The models:
+
+.. code-block :: python
 
     class ToppingManager(models.Manager)
         def savory(self):
@@ -26,10 +29,13 @@ The problem: say you have a bit of logic that applies to a model -- for example,
 This works great, until you want to carry that concept over to "Pizza" classes.
 How do you say that a pizza is savory?  It's savory if its toppings are.  But
 when our logic for the toppings is bound up in the Topping manager, we end up
-having to duplicate it in the Pizza manager too::
+having to duplicate it in the Pizza manager too:
+
+.. code-block :: python
 
     class PizzaManager(models.Manager):
         def savory(self):
+            # Oh noes!  Duplication city!
             return self.filter(Q(topping__savory=True) | Q(topping__salty=True),
                 topping__sweet=False)
 
@@ -44,29 +50,35 @@ a manager method.  It expects the method to return a
 `Q object <https://docs.djangoproject.com/en/1.4/topics/db/queries/#complex-lookups-with-q-objects>`_,
 rather than a queryset; but it wraps the Q object in a ``filter`` call so the 
 manager methods still chain like normal.  In addition, it provides a ``via`` method 
-to prefix all the calls for you::
+to prefix all the calls for you:
+
+.. code-block :: python
 
     class ToppingManager(models.Manager):
         @concept
         def savory(self):
             return Q(Q(savory=True) | Q(salty=True), sweet=False)
 
-This can then be used this way::
+This can then be used this way:
+
+.. code-block :: python
 
     Topping.objects.savory()                # --> returns queryset
     Topping.objects.savory().q              # --> returns the Q object 
     Topping.objects.savory().via("prefix")  # --> returns Q object with
                                             #     prefixed fields
 
-Now we can have fun across relations::
+Now we can have fun across relations:
+
+.. code-block :: python
 
     Pizza.objects.filter(Topping.objects.savory().via("toppings"))
-    Customer.objects.filter(
-        Topping.objects.savory().via("favorite_pizza__toppings")
-    )
+    Customer.objects.filter(Topping.objects.savory().via("favorite_pizza__toppings"))
 
 And we can use the manager class as a place to build a library of higher level
-concepts that can be composed together easily::
+concepts that can be composed together easily:
+
+.. code-block :: python
 
     class ToppingManager(models.Manager):
         @concept
@@ -86,8 +98,7 @@ concepts that can be composed together easily::
             return ((self.savory().q | self.cajun().q) & ~self.high_calorie().q)
 
 
-    >>> diet_cajun_pizzas = Pizza.objects.filter(
-            Topping.objects.diet_cajun().via("toppings"))
+    >>> diet_cajun_pizzas = Pizza.objects.filter(Topping.objects.diet_cajun().via("toppings"))
 
 For more, see the included ``testproject`` and the only 40 lines of source code.
 
