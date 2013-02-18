@@ -112,6 +112,12 @@ Oh, and it works with F expressions too.
 
 For more, see the included ``testproject`` and the only 40 lines of source code.
 
+installation
+------------
+
+::
+    pip install django-conceptq
+
 license
 -------
 
