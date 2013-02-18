@@ -39,7 +39,12 @@ logic yet again.  Not very DRY, bug magnet, etc.
 conceptq
 --------
 
-``conceptq`` is primarily a single decorator, ``@concept``, that you can apply to a manager method.  It expects the method to return a  `Q <https://docs.djangoproject.com/en/1.4/topics/db/queries/#complex-lookups-with-q-objects> object`_, rather than a queryset; but it wraps the Q object in a ``filter`` call so the manager methods still chain like normal.  In addition, it provides a ``via`` method to prefix all the calls for you::
+``conceptq`` is primarily a single decorator, ``@concept``, that you can apply to 
+a manager method.  It expects the method to return a  
+`Q object <https://docs.djangoproject.com/en/1.4/topics/db/queries/#complex-lookups-with-q-objects>`_,
+rather than a queryset; but it wraps the Q object in a ``filter`` call so the 
+manager methods still chain like normal.  In addition, it provides a ``via`` method 
+to prefix all the calls for you::
 
     class ToppingManager(models.Manager):
         @concept
