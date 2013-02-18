@@ -65,15 +65,17 @@ This can then be used this way:
 
     Topping.objects.savory()                # --> returns queryset
     Topping.objects.savory().q              # --> returns the Q object 
-    Topping.objects.savory().via("prefix")  # --> returns Q object with
-                                            #     prefixed fields
+    Topping.objects.savory().via("prefix")  # --> returns Q object with prefixed fields
 
 Now we can have fun across relations:
 
 .. code-block :: python
 
     Pizza.objects.filter(Topping.objects.savory().via("toppings"))
+    # filters with Q(Q(toppings__savory=True) | Q(toppings__salty=True), toppings__sweet=False)
     Customer.objects.filter(Topping.objects.savory().via("favorite_pizza__toppings"))
+    # filters with Q(Q(favorite_pizza__toppings__savory=True) | Q(favorite_pizza__toppings__salty=True),
+    #                Q(favorite_pizza__toppings__sweet=False))
 
 And we can use the manager class as a place to build a library of higher level
 concepts that can be composed together easily:
@@ -99,6 +101,14 @@ concepts that can be composed together easily:
 
 
     >>> diet_cajun_pizzas = Pizza.objects.filter(Topping.objects.diet_cajun().via("toppings"))
+    # filters with: 
+    # Q(
+    #   Q(Q(toppings__savory=True) | Q(toppings__salty=True), Q(toppings__sweet=False)) |
+    #   Q(toppings__savory=True, toppings__burnt=True)
+    # ) & ~Q(toppings__calories__gte=300)
+    #              
+
+Oh, and it works with F expressions too.
 
 For more, see the included ``testproject`` and the only 40 lines of source code.
 
